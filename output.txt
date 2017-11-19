@@ -1,0 +1,15 @@
+is
+     setup
+          should setup num : Pass
+     teardown
+          should teardown num : Pass
+     truthy =>
+          empty array : Pass
+          empty object : Pass
+     falsy =>
+:(          empty array : Fail => false == true
+          NaN : Pass
+          empty string : Pass
+          undefined & nil
+               undefined : Pass
+               null : Pass
