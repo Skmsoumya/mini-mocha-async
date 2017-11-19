@@ -4,9 +4,9 @@ import { test, testSuite, setup, teardown } from './describe';
 const obj = {};
 testSuite('True Or False? ', () => {
   testSuite('setup', () => {
-    test('should setup num', () => {
-      assert.equal(obj.num, 2);
-    });
+      test('should setup num', () => {
+        assert.equal(obj.num, 2);
+      });
     setup(() => {
       obj.num = 2;
     });
@@ -41,8 +41,15 @@ testSuite('True Or False? ', () => {
       });
     });
 
-    test('should test ![] === true ', () => {
-      assert.equal(![], true);
+    test('should test ![] === true ', (done) => {
+      setTimeout(() => {
+        try {
+          assert.equal(![], true);
+          done(); // success case
+        } catch (err) {
+          done(err); // error case
+        }
+      }, 5000);
     });
 
     test('!NaN === true', () => {

@@ -65,7 +65,7 @@ const newTop = title =>
 /*
   	Execute the topmost object from the stack in order of setup => tests => testSuits => teardown
 
-    .forEach(key => stackTop()[key].forEach(activity[key]));
+    returns: a promise which resolves after sucessfull execution of all the processes.
 */
 const execTop = () => {
     return new Promise((resolve, reject) => {
@@ -85,10 +85,17 @@ const execTop = () => {
         processes: "Array", Array of all the processes,
         counter: "Number", the current position of execution
     }
+
+    Returns: A promise which resolvs after sucessfull execution of all the processes.
 */
 
 const executeProcesses = (processes, counter) => {
     return new Promise((resolve, reject) => {
+
+        /*
+            check if all the processes are exected if executed resolve, 
+            else start execution of the next process
+        */
         let counterChecker = () => {
 
             counter = counter + 1;
@@ -100,6 +107,10 @@ const executeProcesses = (processes, counter) => {
             } 
         };
         
+
+        /*
+            execute the current process and all the child fnctions belonging to the process 
+        */
         let executeProcess = () => {
             let currentProcessName = processes[counter];
             executeChildProcess(currentProcessName, 0).then(() => {
@@ -109,7 +120,9 @@ const executeProcesses = (processes, counter) => {
             });
         };
         
-
+        /*
+            Start the execution chain
+        */
         executeProcess();
     });
 };
@@ -117,11 +130,18 @@ const executeProcesses = (processes, counter) => {
 
 /*
     Execute the child process
+
+    returns: a promise that resolves after execting all the sub processes of the current process.
 */
 
 const executeChildProcess = (currentProcessName, counter) => {
     return new Promise((resolve, reject) => {
         let currentProcessExecutables = stackTop()[currentProcessName];
+
+        /*
+            Check if all of the sub processes of current process is executed,
+            if done resolve, else execute the next child process
+        */
         var counterChecker = () => {
             counter = counter + 1;
 
@@ -132,6 +152,10 @@ const executeChildProcess = (currentProcessName, counter) => {
                 executeActivity();
             }
         };
+
+        /*
+            execute the next subprocess, or better to say execute the activity.
+        */
         var executeActivity = () => {
             var currentActivity = activity[currentProcessName];
             var executable = currentProcessExecutables[counter];
@@ -148,6 +172,10 @@ const executeChildProcess = (currentProcessName, counter) => {
             }
             
         };
+
+        /*
+            check if the current process has child execuables, if not resolve
+        */
         if(currentProcessExecutables.length > 0) {
             executeActivity();
         }
@@ -192,7 +220,6 @@ const execTestSuite = (title, testSuiteFn) => {
             /*
                 Pop the topmost item from the stack which was excuted.
             */
-            console.log(stack);
             stack.pop();
             resolve();
         }).catch(() => {
@@ -221,27 +248,30 @@ const reportTests = (fn, title) => {
   		const desc = indentedTitle(title);
   		/*
 			Check if the function accepts an argument if it accepts pass
-			callback function as an argument.
+			callback function as the argument.
   		*/
   		if(fn.length > 0) {
   			fn.call(ctx, (err) => {
   				if(err) {
-  					// failure(desc, e.message);
+  					failure(desc, err.message);
   					reject();
   				}
   				else {
-  					// success(desc);
+  					success(desc);
   					resolve();
   				}
   			});
   		} 
   		else {
+            /*
+                Execute as a sync operation if no callback is needed.
+            */
   			try {
 				fn.call(ctx);
-                // success(desc);
+                success(desc);
 				resolve();
 			} catch (e) {
-				// failure(desc, e.message);
+				failure(desc, e.message);
 				reject();
 			}
   		}
@@ -316,7 +346,6 @@ export const testSuite = (title, testfn) => {
     /*
     	check if the stack is empty.
     */
-    console.log("here");
 	if (isEmptyStack()) {
 	  	/*
 			Execute the testsuite if it is just the first one
@@ -326,6 +355,7 @@ export const testSuite = (title, testfn) => {
         }).catch(() => {
             return;
         });
+        return;
 	}
 
 
